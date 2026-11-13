@@ -59,7 +59,7 @@
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.test.json"
   },
   "dependencies": {
-    "@mark1russell7/files": "^0.0.2"
+    "@mark1russell7/files": "^0.0.3"
   },
   "peerDependencies": {
     "electron": ">=45.0.0"
