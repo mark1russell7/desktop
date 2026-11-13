@@ -6,6 +6,8 @@ packages:
 allowBuilds:
   "@mark1russell7/cue@git+https://github.com/mark1russell7/cue.git": true
   esbuild: true
+  # The package uses only the types of Electron, so the install does not download the Electron binary.
+  electron: false
   # Its install script only checks the native package, which pnpm installs as an optional dependency.
   "@swc/core": false
 
