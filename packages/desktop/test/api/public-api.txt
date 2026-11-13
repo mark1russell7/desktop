@@ -1,0 +1,207 @@
+# The public API of @mark1russell7/desktop
+#
+# The names of each entry of the exports field, and the declaration of each name, without comments
+# and private members. The command `api-report check` compares this file with the built .d.ts files.
+# To accept a change of the API, start the build, then `api-report update`, and review the diff.
+
+## . (build/index.d.ts): names
+
+CONTENT_SECURITY_POLICY: build/page.d.ts#CONTENT_SECURITY_POLICY
+type CaptureSize: build/window.d.ts#CaptureSize
+type DownloadSession: build/session.d.ts#DownloadSession
+type IpcSender: build/ipc.d.ts#IpcSender
+type KeyInput: build/keys.d.ts#KeyInput
+type LoadFailure: build/net-error.d.ts#LoadFailure
+NET_ERRORS: build/net-error.d.ts#NET_ERRORS
+type NavigatingContents: build/navigation.d.ts#NavigatingContents
+PAGE_SCHEME: build/page.d.ts#PAGE_SCHEME
+PAGE_SCHEME_PRIVILEGES: build/page.d.ts#PAGE_SCHEME_PRIVILEGES
+PAGE_URL: build/page.d.ts#PAGE_URL
+type PageHandlerOptions: build/page.d.ts#PageHandlerOptions
+type PermissionSession: build/session.d.ts#PermissionSession
+type PreventableEvent: build/navigation.d.ts#PreventableEvent
+SHOW_TIMEOUT_MS: build/window.d.ts#SHOW_TIMEOUT_MS
+type ShownWindow: build/window.d.ts#ShownWindow
+type WebviewContents: build/navigation.d.ts#WebviewContents
+type WindowOpenContents: build/navigation.d.ts#WindowOpenContents
+type WindowOptions: build/window.d.ts#WindowOptions
+allowsNavigation: build/navigation.d.ts#allowsNavigation
+allowsSender: build/ipc.d.ts#allowsSender
+allowsSiteNavigation: build/navigation.d.ts#allowsSiteNavigation
+captureWindowOptions: build/window.d.ts#captureWindowOptions
+denyWindows: build/navigation.d.ts#denyWindows
+failureOf: build/net-error.d.ts#failureOf
+isMessage: build/ipc.d.ts#isMessage
+pageFile: build/page.d.ts#pageFile
+pageHandler: build/page.d.ts#pageHandler
+pageUrlOf: build/page.d.ts#pageUrlOf
+refuseDownloads: build/session.d.ts#refuseDownloads
+refusePermissions: build/session.d.ts#refusePermissions
+refuseWebviews: build/navigation.d.ts#refuseWebviews
+restrictNavigation: build/navigation.d.ts#restrictNavigation
+returnsKeys: build/keys.d.ts#returnsKeys
+showWhenReady: build/window.d.ts#showWhenReady
+siteViewPreferences: build/window.d.ts#siteViewPreferences
+windowOptions: build/window.d.ts#windowOptions
+
+## Declarations
+
+### build/ipc.d.ts#IpcSender
+export interface IpcSender {
+  readonly senderFrame: {
+    readonly url: string;
+  } | null;
+}
+
+### build/ipc.d.ts#allowsSender
+export declare function allowsSender(page: string, event: IpcSender): boolean;
+
+### build/ipc.d.ts#isMessage
+export declare function isMessage<T extends string>(value: unknown, type: T): value is {
+  readonly type: T;
+};
+
+### build/keys.d.ts#KeyInput
+export interface KeyInput {
+  readonly type: string;
+  readonly key: string;
+  readonly control: boolean;
+  readonly alt: boolean;
+  readonly meta: boolean;
+}
+
+### build/keys.d.ts#returnsKeys
+export declare function returnsKeys(input: KeyInput): boolean;
+
+### build/navigation.d.ts#NavigatingContents
+export interface NavigatingContents {
+  on(event: "will-navigate", listener: (event: PreventableEvent, url: string) => void): unknown;
+}
+
+### build/navigation.d.ts#PreventableEvent
+export interface PreventableEvent {
+  preventDefault(): void;
+}
+
+### build/navigation.d.ts#WebviewContents
+export interface WebviewContents {
+  on(event: "will-attach-webview", listener: (event: PreventableEvent) => void): unknown;
+}
+
+### build/navigation.d.ts#WindowOpenContents
+export interface WindowOpenContents {
+  setWindowOpenHandler(handler: () => {
+    action: "deny";
+  }): void;
+}
+
+### build/navigation.d.ts#allowsNavigation
+export declare function allowsNavigation(page: string, target: string): boolean;
+
+### build/navigation.d.ts#allowsSiteNavigation
+export declare function allowsSiteNavigation(target: string): boolean;
+
+### build/navigation.d.ts#denyWindows
+export declare function denyWindows(contents: WindowOpenContents): void;
+
+### build/navigation.d.ts#refuseWebviews
+export declare function refuseWebviews(contents: WebviewContents): void;
+
+### build/navigation.d.ts#restrictNavigation
+export declare function restrictNavigation(contents: NavigatingContents, allows: (url: string) => boolean): void;
+
+### build/net-error.d.ts#LoadFailure
+export type LoadFailure = "timeout" | "refused" | "network";
+
+### build/net-error.d.ts#NET_ERRORS
+export declare const NET_ERRORS: {
+  readonly ABORTED: -3;
+  readonly TIMED_OUT: -7;
+  readonly ACCESS_DENIED: -10;
+  readonly BLOCKED_BY_CLIENT: -20;
+  readonly BLOCKED_BY_RESPONSE: -27;
+  readonly CONNECTION_REFUSED: -102;
+  readonly CONNECTION_TIMED_OUT: -118;
+};
+
+### build/net-error.d.ts#failureOf
+export declare function failureOf(code: number): LoadFailure | undefined;
+
+### build/page.d.ts#CONTENT_SECURITY_POLICY
+export declare const CONTENT_SECURITY_POLICY: string;
+
+### build/page.d.ts#PAGE_SCHEME
+export declare const PAGE_SCHEME = "app";
+
+### build/page.d.ts#PAGE_SCHEME_PRIVILEGES
+export declare const PAGE_SCHEME_PRIVILEGES: CustomScheme;
+
+### build/page.d.ts#PAGE_URL
+export declare const PAGE_URL = "app://page/index.html";
+
+### build/page.d.ts#PageHandlerOptions
+export interface PageHandlerOptions {
+  readonly contentType: (file: string) => string;
+  readonly contentSecurityPolicy?: string | undefined;
+  readonly readFile?: ((file: string) => Promise<Uint8Array>) | undefined;
+}
+
+### build/page.d.ts#pageFile
+export declare function pageFile(root: string, address: string): string | undefined;
+
+### build/page.d.ts#pageHandler
+export declare function pageHandler(root: string, options: PageHandlerOptions): (request: Request) => Promise<Response>;
+
+### build/page.d.ts#pageUrlOf
+export declare function pageUrlOf(packaged: boolean, env: Readonly<Record<string, string | undefined>>): string;
+
+### build/session.d.ts#DownloadSession
+export interface DownloadSession {
+  on(event: "will-download", listener: (event: PreventableEvent, item: {
+    cancel(): void;
+  }) => void): unknown;
+}
+
+### build/session.d.ts#PermissionSession
+export interface PermissionSession {
+  setPermissionRequestHandler(handler: (webContents: unknown, permission: string, callback: (granted: boolean) => void) => void): void;
+  setPermissionCheckHandler(handler: () => boolean): void;
+}
+
+### build/session.d.ts#refuseDownloads
+export declare function refuseDownloads(session: DownloadSession): void;
+
+### build/session.d.ts#refusePermissions
+export declare function refusePermissions(session: PermissionSession): void;
+
+### build/window.d.ts#CaptureSize
+export interface CaptureSize {
+  readonly w: number;
+  readonly h: number;
+}
+
+### build/window.d.ts#SHOW_TIMEOUT_MS
+export declare const SHOW_TIMEOUT_MS = 4e3;
+
+### build/window.d.ts#ShownWindow
+export interface ShownWindow {
+  once(event: "ready-to-show", listener: () => void): unknown;
+  isDestroyed(): boolean;
+  isVisible(): boolean;
+  show(): void;
+}
+
+### build/window.d.ts#WindowOptions
+export type WindowOptions = Omit<BrowserWindowConstructorOptions, "webPreferences">;
+
+### build/window.d.ts#captureWindowOptions
+export declare function captureWindowOptions(size: CaptureSize, partition: string): BrowserWindowConstructorOptions;
+
+### build/window.d.ts#showWhenReady
+export declare function showWhenReady(window: ShownWindow, timeoutMs: number, log: (message: string) => void): void;
+
+### build/window.d.ts#siteViewPreferences
+export declare function siteViewPreferences(partition: string): WebPreferences;
+
+### build/window.d.ts#windowOptions
+export declare function windowOptions(preload: string, options?: WindowOptions): BrowserWindowConstructorOptions;
