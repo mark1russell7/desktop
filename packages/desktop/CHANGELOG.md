@@ -1,5 +1,9 @@
 # Changelog of @mark1russell7/desktop
 
+## 0.1.1
+
+- `pageHandler` serves the bytes of a reader that gives a view of a `SharedArrayBuffer`. Before, the `Response` refused that body, and the handler threw. Now the handler copies such a view. A view of an `ArrayBuffer` stays as it is.
+
 ## 0.1.0
 
 The first version. The code comes from the app pairrank (`packages/desktop/src/index.ts` and `packages/desktop/src/main.ts`).

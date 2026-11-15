@@ -112,4 +112,14 @@ describe("pageHandler", () => {
     expect(await response.text()).toBe("fake");
     expect(response.headers.get("content-security-policy")).toBe("default-src 'self'");
   });
+
+  it("serves the bytes of a reader that gives a view of a SharedArrayBuffer", async () => {
+    // A Response refuses a view of a SharedArrayBuffer, so the handler copies it
+    const shared = new Uint8Array(new SharedArrayBuffer(4));
+    shared.set(new TextEncoder().encode("fake"));
+    const handle = pageHandler(root, { contentType, readFile: () => Promise.resolve(shared) });
+    const response = await handle(new Request("app://page/page.js"));
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe("fake");
+  });
 });

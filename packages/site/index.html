@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>desktop</title>
-<meta name="description" content="Safe defaults for Electron desktop apps: content security policy, window options, navigation and permission rules, and the app:// protocol.">
+<title>desktop: safe defaults for Electron apps, live</title>
+<meta name="description" content="Safe defaults for the main process of an Electron app: navigation guards, the app:// scheme, the content security policy, window options, load failures and IPC checks. Try each one live.">
 <script>
   // The theme before the first paint: the choice of the visitor, else the theme of the system.
   try { const t = localStorage.getItem("theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch {}
@@ -16,6 +16,7 @@
 <header class="top">
   <a class="brand" href="./">desktop</a>
   <nav aria-label="Site">
+    <a href="#demos">Demos</a>
     <a href="./releases/">Releases</a>
     <a href="./status/">Status</a>
     <a href="https://github.com/mark1russell7/desktop">GitHub</a>
@@ -24,15 +25,117 @@
 </header>
 
 <main>
-  <h1>desktop</h1>
-  <p class="lead">Safe defaults for Electron desktop apps: content security policy, window options, navigation and permission rules, and the app:// protocol.</p>
+  <h1>Safe defaults for the main process of an Electron app</h1>
+  <p class="lead">An Electron page can get Node.js, open new windows, go to any site and ask for the camera. <code>@mark1russell7/desktop</code> closes each of these doors with one function call. Each demo on this page runs the real functions of the package in your browser.</p>
 
-  <h2>Install</h2>
+  <ul class="doors" aria-label="What the package gives">
+    <li><b>One origin.</b> The window stays on its page.</li>
+    <li><b>No Node.js.</b> A sandbox and context isolation.</li>
+    <li><b>No path tricks.</b> <code>app://</code> serves one folder.</li>
+    <li><b>No permissions.</b> No camera, microphone or download.</li>
+  </ul>
+
   <div class="command">
     <code id="install">pnpm add @mark1russell7/desktop</code>
     <button id="copy" type="button">Copy</button>
   </div>
-  <p class="note">This package has no release on npm yet. <a href="./releases/">Releases</a> shows each version, and <a href="./status/">Status</a> shows the open work.</p>
+
+  <section id="demos" class="demo" aria-labelledby="nav-title">
+    <h2 id="nav-title">1. Where can a window go?</h2>
+    <p>The window of the app shows <code>app://page/index.html</code>. A link or a script tries to go to another address. <code>restrictNavigation</code> sends the address to a rule, and stops the navigation when the rule says no. Type an address, or pick one.</p>
+    <label class="field">The address of the navigation
+      <input id="nav-target" type="text" spellcheck="false" autocomplete="off" value="https://example.com/login">
+    </label>
+    <div class="chips" id="nav-chips" aria-label="Sample addresses"></div>
+    <div class="verdicts" id="nav-result" aria-live="polite"></div>
+    <p class="call"><code>restrictNavigation(contents, (url) =&gt; allowsNavigation(page, url))</code></p>
+  </section>
+
+  <section class="demo" aria-labelledby="page-title">
+    <h2 id="page-title">2. Which file does <code>app://page/</code> serve?</h2>
+    <p>The main process serves the folder <code>/opt/notes/page</code> under <code>app://page/</code>. The file <code>/opt/notes/package.json</code> is one folder up. <code>pageHandler</code> serves only the files in the folder, each with the content security policy. Try to get out of the folder.</p>
+    <label class="field">The address of the request
+      <input id="page-address" type="text" spellcheck="false" autocomplete="off" value="app://page/main.js">
+    </label>
+    <div class="chips" id="page-chips" aria-label="Sample requests"></div>
+    <div id="page-result" class="response" aria-live="polite"></div>
+    <p class="call"><code>protocol.handle("app", pageHandler(folder, { contentType }))</code></p>
+  </section>
+
+  <section class="demo" aria-labelledby="csp-title">
+    <h2 id="csp-title">3. The content security policy</h2>
+    <p>Each file of the page gets this policy. The page loads only its own scripts and styles. It has no inline script, no connection to a server and no frame.</p>
+    <ul id="csp" class="policy"></ul>
+  </section>
+
+  <section class="demo" aria-labelledby="win-title">
+    <h2 id="win-title">4. The options of a window</h2>
+    <p>The caller sets the size, the title and the other options. The web preferences are not the caller's choice: the page has no Node.js, a sandbox and context isolation. Try to turn on Node.js.</p>
+    <div class="tabs" role="tablist" aria-label="The kind of window">
+      <button type="button" role="tab" id="win-app" aria-selected="true" data-kind="app">Window of the app</button>
+      <button type="button" role="tab" id="win-site" aria-selected="false" data-kind="site">View of a site</button>
+      <button type="button" role="tab" id="win-capture" aria-selected="false" data-kind="capture">Capture window</button>
+    </div>
+    <label class="field"><span id="win-label">The options, as JSON</span>
+      <textarea id="win-input" rows="4" spellcheck="false"></textarea>
+    </label>
+    <div id="win-result" aria-live="polite"></div>
+    <p class="call"><code id="win-call">new BrowserWindow(windowOptions(preload, options))</code></p>
+  </section>
+
+  <section class="demo" aria-labelledby="load-title">
+    <h2 id="load-title">5. Why did the load fail?</h2>
+    <p>The event <code>did-fail-load</code> gives a Chromium net error code. <code>failureOf</code> gives the reason, so the app knows if another try can help.</p>
+    <label class="field">The error code
+      <input id="load-code" type="number" step="1" value="-102">
+    </label>
+    <div class="chips" id="load-chips" aria-label="Sample error codes"></div>
+    <div id="load-result" class="verdict-box" aria-live="polite"></div>
+  </section>
+
+  <section class="demo" aria-labelledby="ipc-title">
+    <h2 id="ipc-title">6. Can the main process trust this message?</h2>
+    <p>A message from the page is data that the main process does not trust. The handler checks the type of the message with <code>isMessage</code>, and the frame that sent it with <code>allowsSender</code>.</p>
+    <div class="pair">
+      <label class="field">The message, as JSON
+        <input id="ipc-json" type="text" spellcheck="false" autocomplete="off" value='{"type":"save","text":"Hello"}'>
+      </label>
+      <label class="field">The type that the handler reads
+        <input id="ipc-type" type="text" spellcheck="false" autocomplete="off" value="save">
+      </label>
+    </div>
+    <label class="field">The address of the frame that sent it
+      <input id="ipc-frame" type="text" spellcheck="false" autocomplete="off" value="app://page/index.html">
+    </label>
+    <div class="chips" id="ipc-chips" aria-label="Sample frames"></div>
+    <div class="verdicts" id="ipc-result" aria-live="polite"></div>
+  </section>
+
+  <section class="demo" aria-labelledby="keys-title">
+    <h2 id="keys-title">7. Give the keys back to the app</h2>
+    <p>A click on the view of a site gives the keys to the site. <code>returnsKeys</code> tells when a key press gives them back: <kbd>Escape</kbd> with no modifier key. Click the box and press keys, or use the buttons.</p>
+    <div id="keys-box" class="keys-box" tabindex="0" role="application" aria-label="The view of a site. Press keys here.">The view of a site. Press keys here.</div>
+    <div class="chips" id="keys-chips" aria-label="Sample key presses"></div>
+    <ol id="keys-log" class="log" aria-live="polite"></ol>
+  </section>
+
+  <section class="demo" aria-labelledby="perm-title">
+    <h2 id="perm-title">8. No permission, no download</h2>
+    <p><code>refusePermissions</code> and <code>refuseDownloads</code> set the handlers of a session. The demo applies them to a fake session. Ask for a permission or start a download.</p>
+    <div class="chips" id="perm-chips" aria-label="Permission requests"></div>
+    <ol id="perm-log" class="log" aria-live="polite"></ol>
+  </section>
+
+  <h2>Use it</h2>
+  <p>Call the rules one time, when the app starts. The <a href="https://github.com/mark1russell7/desktop/tree/main/packages/desktop#readme">README</a> tells each function.</p>
+  <pre class="code"><code>app.on("web-contents-created", (_event, contents) =&gt; {
+  refuseWebviews(contents);
+  denyWindows(contents);
+  restrictNavigation(contents, (url) =&gt; allowsNavigation(page, url));
+});
+refusePermissions(session.defaultSession);
+refuseDownloads(session.defaultSession);</code></pre>
+  <p class="note"><a href="./releases/">Releases</a> shows each version, and <a href="./status/">Status</a> shows the open work. The demos use the POSIX rules for paths, as Linux and macOS do.</p>
 </main>
 
 <script type="module" src="./src/index.ts"></script>
