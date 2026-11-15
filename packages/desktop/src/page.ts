@@ -74,6 +74,14 @@ export function pageFile(root: string, address: string): string | undefined {
   return isInside(base, file) ? file : undefined;
 }
 
+/**
+ * This function gives the bytes as a view of an `ArrayBuffer`, because the body of a `Response` cannot be a view of a
+ * `SharedArrayBuffer`. A view of an `ArrayBuffer` stays as it is. Each other view gets a copy.
+ */
+function arrayBufferView(bytes: Uint8Array): Uint8Array<ArrayBuffer> {
+  return bytes.buffer instanceof ArrayBuffer ? (bytes as Uint8Array<ArrayBuffer>) : new Uint8Array(bytes);
+}
+
 /** The options of `pageHandler`. */
 export interface PageHandlerOptions {
   /** This function gives the content type of a file. A module script must have a JavaScript type. */
@@ -103,6 +111,6 @@ export function pageHandler(root: string, options: PageHandlerOptions): (request
     } catch {
       return new Response("Not found", { status: 404 });
     }
-    return new Response(body, { headers: { "content-type": options.contentType(file), "content-security-policy": policy } });
+    return new Response(arrayBufferView(body), { headers: { "content-type": options.contentType(file), "content-security-policy": policy } });
   };
 }
