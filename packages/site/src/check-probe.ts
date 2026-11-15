@@ -12,9 +12,9 @@ const text = (selector: string): string => $(selector)?.textContent ?? "";
 const chip = (row: string, label: string): HTMLElement | null => $$(`#${row} button`).find((element) => element.textContent === label) ?? null;
 
 type("#nav-target", "app://page/settings.html");
-check("the window goes to another page of the app", await until(() => $$("#nav-result .verdict.ok").length === 1 && text("#nav-result").includes("Window of the app: goes")), text("#nav-result"));
+check("the window goes to another page of the app", await until(() => $$("#nav-result .sp-verdict.sp-pass").length === 1 && text("#nav-result").includes("Window of the app: goes")), text("#nav-result"));
 click(chip("nav-chips", "javascript:"));
-check("each guard stops javascript:", await until(() => $$("#nav-result .verdict.no").length === 2), text("#nav-result"));
+check("each guard stops javascript:", await until(() => $$("#nav-result .sp-verdict.sp-fail").length === 2), text("#nav-result"));
 
 click(chip("page-chips", "A script"));
 check("the page scheme serves main.js with the policy", await until(() => text("#page-result").includes("200 OK") && text("#page-result").includes("default-src 'none'")), text("#page-result"));

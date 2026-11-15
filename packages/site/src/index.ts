@@ -4,6 +4,7 @@
  * @packageDocumentation
  */
 import { byId, copyText, h, setupTheme } from "@mark1russell7/site-pages/chrome";
+import { examples, setField, verdict } from "@mark1russell7/site-pages/demo";
 import { NET_ERRORS, type KeyInput } from "@mark1russell7/desktop";
 import {
   DEMO_PAGE,
@@ -29,32 +30,9 @@ copy.addEventListener("click", () => {
   void copyText(copy, byId("install").textContent ?? "");
 });
 
-/** This function fills a row of buttons. A click on a button starts `pick` with its value. */
-function chips(id: string, values: readonly (readonly [label: string, value: string])[], pick: (value: string) => void): void {
-  const host = byId(id);
-  host.replaceChildren(
-    ...values.map(([label, value]) => {
-      const button = h("button", { type: "button", class: "chip", title: value }, label);
-      button.addEventListener("click", () => pick(value));
-      return button;
-    }),
-  );
-}
-
-/** This function makes the line of one verdict: a mark, a title and a reason. */
-function verdict(ok: boolean, okText: string, noText: string, title: string, reason: string): HTMLElement {
-  return h(
-    "div",
-    { class: ok ? "verdict ok" : "verdict no" },
-    h("span", { class: "mark", "aria-hidden": "true" }, ok ? "✓" : "✕"),
-    h("div", {}, h("b", {}, `${title}: ${ok ? okText : noText}.`), " ", reason),
-  );
-}
-
-/** This function sets the value of a field and sends an `input` event. */
-function setField(field: HTMLInputElement | HTMLTextAreaElement, value: string): void {
-  field.value = value;
-  field.dispatchEvent(new Event("input"));
+/** This function makes the verdict line of a guard: "Title: what it does." in bold, then the reason. */
+function guard(ok: boolean, okText: string, noText: string, title: string, reason: string): HTMLDivElement {
+  return verdict(ok, `${title}: ${ok ? okText : noText}.`, reason);
 }
 
 // 1. Navigation
@@ -66,14 +44,14 @@ function showNavigation(): void {
   const origin = result.targetOrigin === undefined ? "The text is not an address." : `The address has the origin ${result.targetOrigin}.`;
   const same = result.targetOrigin === result.pageOrigin;
   byId("nav-result").replaceChildren(
-    verdict(
+    guard(
       result.window,
       "goes",
       "stopped",
       "Window of the app",
       `${origin} The page has the origin ${result.pageOrigin ?? "none"}${same ? ", the same" : ""}.`,
     ),
-    verdict(
+    guard(
       result.site,
       "goes",
       "stopped",
@@ -83,8 +61,8 @@ function showNavigation(): void {
   );
 }
 navTarget.addEventListener("input", showNavigation);
-chips(
-  "nav-chips",
+examples(
+  byId("nav-chips"),
   [
     ["Another page of the app", "app://page/settings.html"],
     ["A website", "https://example.com/login"],
@@ -120,8 +98,8 @@ async function showPage(): Promise<void> {
   );
 }
 pageAddress.addEventListener("input", () => void showPage());
-chips(
-  "page-chips",
+examples(
+  byId("page-chips"),
   [
     ["The root", "app://page/"],
     ["A script", "app://page/main.js"],
@@ -159,9 +137,9 @@ function showWindow(): void {
   winText[winKind] = winInput.value;
   const result = windowResult(winKind, winInput.value);
   const parts: HTMLElement[] = [];
-  if (result.error !== undefined) parts.push(verdict(false, "", "no options", "Error", result.error));
+  if (result.error !== undefined) parts.push(guard(false, "", "no options", "Error", result.error));
   for (const each of result.refused) {
-    parts.push(verdict(false, "", "refused", `webPreferences.${each.key}`, `You asked for ${JSON.stringify(each.asked)}. The window gets ${JSON.stringify(each.got)}.`));
+    parts.push(guard(false, "", "refused", `webPreferences.${each.key}`, `You asked for ${JSON.stringify(each.asked)}. The window gets ${JSON.stringify(each.got)}.`));
   }
   if (result.options !== undefined) parts.push(h("pre", { class: "json", "aria-label": "The options" }, JSON.stringify(result.options, null, 2)));
   byId("win-result").replaceChildren(...parts);
@@ -197,8 +175,8 @@ function showLoad(): void {
   );
 }
 loadCode.addEventListener("input", showLoad);
-chips(
-  "load-chips",
+examples(
+  byId("load-chips"),
   [...Object.entries(NET_ERRORS), ...Object.entries(MORE_NET_ERRORS)].map(([name, code]) => [`${String(code)} ${name}`, String(code)] as const),
   (value) => setField(loadCode, value),
 );
@@ -214,9 +192,9 @@ function showMessage(): void {
   const result = checkMessage(ipcJson.value, ipcType.value, frame === "" ? null : frame);
   byId("ipc-result").replaceChildren(
     result.error === undefined
-      ? verdict(result.typed, "yes", "no", "isMessage", result.typed ? `The data is an object with type "${ipcType.value}".` : `The data is not an object with type "${ipcType.value}".`)
-      : verdict(false, "", "no", "isMessage", `The text is not JSON: ${result.error}`),
-    verdict(
+      ? guard(result.typed, "yes", "no", "isMessage", result.typed ? `The data is an object with type "${ipcType.value}".` : `The data is not an object with type "${ipcType.value}".`)
+      : guard(false, "", "no", "isMessage", `The text is not JSON: ${result.error}`),
+    guard(
       result.sender,
       "yes",
       "no",
@@ -227,8 +205,8 @@ function showMessage(): void {
   );
 }
 for (const field of [ipcJson, ipcType, ipcFrame]) field.addEventListener("input", showMessage);
-chips(
-  "ipc-chips",
+examples(
+  byId("ipc-chips"),
   [
     ["The page", "app://page/index.html"],
     ["A frame of a site", "https://ads.example/frame.html"],
@@ -251,8 +229,8 @@ byId("keys-box").addEventListener("keydown", (event) => {
   event.preventDefault();
   logKey(keyInputOf(event));
 });
-chips(
-  "keys-chips",
+examples(
+  byId("keys-chips"),
   [
     ["Escape", "Escape"],
     ["Ctrl+Escape", "Ctrl+Escape"],
@@ -273,8 +251,8 @@ function logPermission(text: string, refused: boolean): void {
   permLog.prepend(h("li", { class: refused ? "ok" : "no" }, text));
   while (permLog.children.length > 5) permLog.lastElementChild?.remove();
 }
-chips(
-  "perm-chips",
+examples(
+  byId("perm-chips"),
   [
     ["Camera and microphone", "media"],
     ["Notifications", "notifications"],
