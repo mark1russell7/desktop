@@ -137,7 +137,8 @@ function showWindow(): void {
   winText[winKind] = winInput.value;
   const result = windowResult(winKind, winInput.value);
   const parts: HTMLElement[] = [];
-  if (result.error !== undefined) parts.push(guard(false, "", "no options", "Error", result.error));
+  // The verdict names what the call gives, as the other verdicts do. The words of the refusal are the reason below it.
+  if (result.error !== undefined) parts.push(guard(false, "", "none", "The options", result.error));
   for (const each of result.refused) {
     parts.push(guard(false, "", "refused", `webPreferences.${each.key}`, `You asked for ${JSON.stringify(each.asked)}. The window gets ${JSON.stringify(each.got)}.`));
   }
