@@ -26,7 +26,7 @@ check("the policy shows 7 directives", $$("#csp li").length === 7, $$("#csp li")
 check("the window refuses nodeIntegration", text("#win-result").includes("webPreferences.nodeIntegration: refused"), text("#win-result"));
 click("#win-site");
 type("#win-input", "");
-check("an empty partition is an error", await until(() => text("#win-result").includes("Error: no options")), text("#win-result"));
+check("an empty partition gives no options", await until(() => text("#win-result").includes("The options: none.")), text("#win-result"));
 click("#win-app");
 
 click(chip("load-chips", "-7 TIMED_OUT"));
